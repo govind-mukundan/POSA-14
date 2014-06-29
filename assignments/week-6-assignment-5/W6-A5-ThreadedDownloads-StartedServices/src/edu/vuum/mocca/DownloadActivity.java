@@ -2,10 +2,12 @@ package edu.vuum.mocca;
 
 import java.lang.ref.WeakReference;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.Toast;
+import android.os.Bundle;
 
 /**
  * This is the main activity that the program uses to start the
@@ -78,6 +80,8 @@ public class DownloadActivity extends DownloadBase {
                 // bitmap that's been downloaded and returned to
                 // the DownloadActivity as a pathname who's Bundle
             	// key is defined by DownloadUtils.PATHNAME_KEY
+            	Bundle bund = msg.getData();
+            	activity.displayBitmap(bund.getString(DownloadUtils.PATHNAME_KEY));
             }
     	}
     }
@@ -101,13 +105,15 @@ public class DownloadActivity extends DownloadBase {
      */
     public void runService(View view) {
     	String which = "";
-
+    	Intent intent = null;
+    	
     	switch (view.getId()) {
         case R.id.intent_service_button:
             // TODO - You fill in here to start the
             // DownloadIntentService with the appropriate Intent
             // returned from the makeIntent() factory method.
-
+        	intent = DownloadUtils.makeMessengerIntent(this, DownloadIntentService.class, this.handler,this.getUrlString());
+        	startService(intent);
             which = "Starting DownloadIntentService";
             break;
         
@@ -115,7 +121,8 @@ public class DownloadActivity extends DownloadBase {
             // TODO - You fill in here to start the
             // ThreadPoolDownloadService with the appropriate Intent
             // returned from the makeIntent() factory method.
-
+            intent = DownloadUtils.makeMessengerIntent(this, ThreadPoolDownloadService.class, this.handler,this.getUrlString());
+        	startService(intent);
             which = "Starting ThreadPoolDownloadService";
             break;
         

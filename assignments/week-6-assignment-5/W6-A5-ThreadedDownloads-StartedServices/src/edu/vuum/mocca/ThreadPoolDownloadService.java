@@ -2,6 +2,7 @@ package edu.vuum.mocca;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import android.app.Service;
 import android.content.Context;
@@ -49,7 +50,7 @@ public class ThreadPoolDownloadService extends Service {
         // FixedThreadPool Executor that's configured to use
         // MAX_THREADS. Use a factory method in the Executors class.
 
-        mExecutor = null;
+        mExecutor = Executors.newFixedThreadPool(MAX_THREADS);
     }
 
     /**
@@ -73,8 +74,8 @@ public class ThreadPoolDownloadService extends Service {
     	// TODO - You fill in here, by replacing null with an
         // invocation of the appropriate factory method in
         // DownloadUtils that makes a MessengerIntent.
-
-        return null;
+    	Intent intent = DownloadUtils.makeMessengerIntent(context, ThreadPoolDownloadService.class, handler, uri);
+        return intent;
     }
 
     /**
@@ -93,7 +94,16 @@ public class ThreadPoolDownloadService extends Service {
         // the uri in the intent and returns the file's pathname using
         // a Messenger who's Bundle key is defined by DownloadUtils.MESSENGER_KEY.
 
-        Runnable downloadRunnable = null;
+        Runnable downloadRunnable = new Runnable() {
+            public void run() {
+                try {
+                	Messenger messenger = (Messenger)intent.getParcelableExtra(DownloadUtils.MESSENGER_KEY);
+                	DownloadUtils.downloadAndRespond(getBaseContext(), intent.getData(), messenger);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
 
         mExecutor.execute(downloadRunnable);
       

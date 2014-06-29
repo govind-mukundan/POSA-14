@@ -58,6 +58,8 @@ public class AndroidPlatformStrategy extends PlatformStrategy
          * and appends the outputString to a TextView. 
          */
         // TODO - You fill in here.
+    	// Govind - it's important to use a NULL pointer check for the Activity because it's possible that the activity will disappear
+    	// Since this is a weak refreence, its possible that the actual reference will be garbage collected.
     	mActivity.get().runOnUiThread(new Runnable() {
     		public void run() {
                 try {
@@ -75,6 +77,8 @@ public class AndroidPlatformStrategy extends PlatformStrategy
     public void done()
     {	
         // TODO - You fill in here.
+    	// Govind - Technically its better to post this countdown on a runnable on the UI thread because
+    	// you want this to execute only after all the print's are done.
     	mLatch.countDown();
     }
 
