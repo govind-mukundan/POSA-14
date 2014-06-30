@@ -60,16 +60,15 @@ public class AndroidPlatformStrategy extends PlatformStrategy
         // TODO - You fill in here.
     	// Govind - it's important to use a NULL pointer check for the Activity because it's possible that the activity will disappear
     	// Since this is a weak refreence, its possible that the actual reference will be garbage collected.
-    	mActivity.get().runOnUiThread(new Runnable() {
-    		public void run() {
-                try {
-                	mTextViewOutput.setText(mTextViewOutput.getText() + outputString + "\n");
-                	Log.d("mooc", outputString);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }	
-    	});
+    	// only update the text view if the UI thread still exists
+    	Activity currentActivity = (Activity) mActivity.get();
+    	if (currentActivity != null) {
+    		currentActivity.runOnUiThread(new Runnable() {
+    			public void run() {
+    				mTextViewOutput.append(outputString + System.getProperty("line.separator"));
+    			}
+    		});
+    	}
     	
     }
 
@@ -79,7 +78,18 @@ public class AndroidPlatformStrategy extends PlatformStrategy
         // TODO - You fill in here.
     	// Govind - Technically its better to post this countdown on a runnable on the UI thread because
     	// you want this to execute only after all the print's are done.
-    	mLatch.countDown();
+    	Activity currentActivity = (Activity) mActivity.get();
+    	if (currentActivity != null) {
+    		currentActivity.runOnUiThread(new Runnable() {
+    			public void run() {
+    				mLatch.countDown();
+    			}
+    		});
+    	} else {
+    		// if the UI thread disappears, make sure the latch 
+    		// is still decremented
+    		mLatch.countDown();
+    	}
     }
 
     /** Barrier that waits for all the game threads to finish. */
